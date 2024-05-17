@@ -173,6 +173,8 @@ plt.show()
 ```
 ![ProductionBudget_Over_Time](https://github.com/Bozzojr/FilmDataAnalysis_Python/assets/123130175/7ea71f6e-416c-4de6-8444-ff7043a06bf6)
 
+Directionality varies year-over-year, but long term production budget for films is trending upwards. 
+
 ## Correlation Analysis and Heatmap
 We'll start by calculating the correlations for the numerical variables in our data, and creating a heatmap from it
 
@@ -225,15 +227,72 @@ print(f"ANOVA result: F-statistic = {genre_anova_result.statistic}, p-value = {g
 
 With a high F-statistic and a low P-value, we can conclude there are significant differences in revenue among genres
 
-We can now use Tukey's HSD (Honestly Significant Difference) test to identify which pairs of genres are significantly different
+### Tukey's HSD Test
 
-Our threshold for significant difference will be .05 or 5%, which implies that there is a 5% risk of concluding that a difference exists when there is no actual difference.
+We can now use Tukey's HSD (Honestly Significant Difference) test to identify which pairs of genres are significantly different in terms of worldwide gross revenue. 
+
+Our threshold for significant difference will be .05 or 5%, which implies that there is a 5% risk of concluding that these means are statistically different, when the difference could be by chance or randomness.
 
 ```python
 genre_tukey_results = pairwise_tukeyhsd(endog=exploded_genres['Worldwide gross $'], groups = exploded_genres['genre_list'], alpha = 0.05)
 print(genre_tukey_results)
 ```
 This list shows us, with 95% confidence, which genres are significantly different from eachother in terms of worldwide gross revenue
+
+Here is a snippet of what this list would look like, with Action being our comparison group for the example
+
+![Tukeys_hsd_genres](https://github.com/Bozzojr/FilmDataAnalysis_Python/assets/123130175/ea247e06-5a17-4f42-b521-d9f054384a3e)
+
+#### Output of Tukey's Test
+
+**'group1' and 'group2':** The pairs of genres being compared.
+
+**'meandiff':** The difference in means between the two genres.
+
+**'p-adj':** The adjusted p-value after accounting for multiple testing, which tells you whether the difference  in means between each pair of genres is statistically significant.
+
+**'lower' and 'upper':** The lower and upper bounds of the 95% confidence interval for the mean difference
+
+**'reject':** A boolean that indicates whether or not to reject the null hypothesis of equal averages. If 'True', it means there is a statistically significant differenct between those genre pairs
+
+Looking at this list for the **Documentary** Genre has the largest statistically significant mean difference from **Action.**, with documentaries earning, on average, about $162,422,372.88 less than action movies worldwide. This difference is followed closely by **Animation** which earns significantly more than action movies. It might be useful in the future to delve deeper into why these genres differ so much from Action in terms of revenue. Possible factors could include market preferences, production costs, distribution strategies, and audience reach. 
+
+While genres like "Film-Noir" and "News" have larger or comparable mean differences, these results are not statistically significant (the p-values are much higher than 0.05), so these differences could be due to chance and not indicative of a true effect.
+
+## Multiple Linear Regression Analysis
+
+We want to runa multiple regression analysis to predict worldwide gross revenue based on multiple inputs to get more insight into thte factors that most significantly impact a movies's financial sucess. 
+
+Here are the steps to our analysis:
+
+1) **Data Preperation:** Select the predictors you think might influence the worldwide gross revenue and ensure they are in the coreect format
+2) **Building the Model:** Use 'statsmodels' to build and fit the regression model
+3) **Interpret Results:** Analyze the output to understand the infulence of each predictor
+
+Code for performing this analysis:
+```python
+import statsmodels.api as sm
+
+# One-hot encode 'genre_list'
+filmData = pd.get_dummies(filmData, columns=['genre_list'])
+
+# Prepare predictors including the new dummy variables and the year
+X = filmData[['Production budget $', 'runtime_minutes', 'movie_averageRating', 'movie_numerOfVotes', 'year'] + [col for col in filmData.columns if 'genre_list_' in col]]
+y = filmData['Worldwide gross $']
+
+# Add a constant for the intercept
+X = sm.add_constant(X)
+
+# Fit the model
+model = sm.OLS(y, X).fit()
+
+# View the model summary
+print(model.summary())
+```
+
+Output: 
+
+   
 
 
 
