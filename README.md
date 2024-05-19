@@ -274,11 +274,42 @@ Code for performing this analysis:
 import statsmodels.api as sm
 
 # One-hot encode 'genre_list'
-filmData = pd.get_dummies(filmData, columns=['genre_list'])
+filmData_regression = pd.get_dummies(exploded_genres, columns=['genre_list'], drop_first=True)
+filmData_regression['production_date'] = pd.to_datetime(filmData_regression['production_date'])
+filmData_regression['production_year'] = filmData_regression['production_date'].dt.year
 
-# Prepare predictors including the new dummy variables and the year
-X = filmData[['Production budget $', 'runtime_minutes', 'movie_averageRating', 'movie_numerOfVotes', 'year'] + [col for col in filmData.columns if 'genre_list_' in col]]
-y = filmData['Worldwide gross $']
+genre_columns = [col for col in filmData_regression.columns if 'genre_list_' in col]
+
+#Re-aggregate Data
+filmData_regression = filmData_regression.groupby('movie_title').agg({
+    'production_date': 'first',
+    'genres': 'first',
+    'runtime_minutes': 'first',
+    'director_name': 'first',
+    'director_professions': 'first',
+    'director_birthYear': 'first',
+    'director_deathYear': 'first',
+    'movie_averageRating': 'first',
+    'movie_numerOfVotes': 'first',
+    'approval_Index': 'first',  
+    'Production budget $': 'first',
+    'Domestic gross $': 'first',
+    'Worldwide gross $': 'first',
+    'production_year': 'first',
+    **{col: 'max' for col in genre_columns}
+}).reset_index()
+
+
+
+
+
+# Prepare predictors for x, y least squares constant
+X = filmData_regression[['Production budget $', 'runtime_minutes', 'movie_averageRating', 'movie_numerOfVotes', 'production_year'] + [col for col in genre_columns]]
+bool_cols = [col for col in X.columns if X[col].dtype == bool]
+X[bool_cols] = X[bool_cols].astype(int) 
+
+y = filmData_regression['Worldwide gross $']
+
 
 # Add a constant for the intercept
 X = sm.add_constant(X)
@@ -290,9 +321,42 @@ model = sm.OLS(y, X).fit()
 print(model.summary())
 ```
 
-Output: 
+#### Output: 
+![LS_regression_v1](https://github.com/Bozzojr/FilmDataAnalysis_Python/assets/123130175/2e18eca6-1343-4425-9e00-9709fece95fc)
 
-   
+#### Interpretation:
+
+### Modal Summary Overview
+    1) **Dependent Variable:** Worldwide gross $
+    2) **R-squared:** 0.650 - This means that about 65% of the variability in worldwide gross revenue is explained by the model, which is relatively high, suggesting a good fit of the model to the data.
+    3) **Adj. R-squared:** 0.648 - This is adjusted for the number of predictors and is very close to the R-squared, indicating that the addition of variables is appropriate and they collectively contribute significantly.
+    4) **F-statistic and Prob (F-statistic):** The model is statistically significant as the probability of the F-statistic is extremely low (approaching zero).
+### Coefficients Interpretation
+The coefficients tables shows the impact of each variable:
+
+    1)**const (Constant):** The intercept has a large negative value, but it's not statistically significant (p-value: 0.657), suggesting that when all other variables are zero, the base expected revenue is significantly negative but should not be considered reliable or meaningful in this context.
+    
+    2)**Production budget $:** For each additional dollar in the production budget, the worldwide gross increases by about $2.49, which is significant.
+    
+    3)**Runtime minutes:** Surprisingly, each additional minute is associated with an increase in revenue of approximately $162,700, though this is not statistically significant (p-value: 0.183).
+    
+    4)**Movie average rating:** Each point increase in the rating is associated with an increase of about $8.56 million in revenue, which is significant.
+    
+    5)**Movie number of votes:** Each additional vote corresponds to an increase of about $308.64 in revenue, significantly influencing revenue.
+    
+    6)**Production year:** Shows a small positive coefficient, but it's not significant, indicating no clear trend over the years included in the dataset.
+    
+    7)**Genre-specific coefficients** indicate how much more (or less) revenue a movie of a specific genre is expected to make compared to the baseline category 
+        **-Positive and significant:** genre_list_Adventure, genre_list_Animation, genre_list_Documentary, genre_list_Family, genre_list_Horror, genre_list_Romance, and others show significant positive impacts on revenue.
+        -**Negative and significant:** genre_list_Crime, genre_list_Drama, genre_list_Sci-Fi show significant negative impacts.
+### Diagnostic Statistics
+    1)**Omnibus, Prob(Omnibus), Skew, Kurtosis, Jarque-Bera, Prob(Jarque-Bera):** These diagnostics indicate that the residuals of the model do not follow a normal distribution (skewness, kurtosis significantly different from what's expected in a normal distribution). This might impact the reliability of the coefficient estimates.
+    2)**Durbin-Watson:** The value of 1.641 suggests moderate autocorrelation among residuals, which is another concern for the assumptions of classical linear regression.
+    3)**Condition Number:** A very high condition number indicates potential multicollinearity among predictors, which can inflate the variance of coefficient estimates making them unstable and unreliable.
+### Recommendations and Next Steps...
+This regression analysis is a work in progress. Plans to optimize model coming soon....
+
+
 
 
 
