@@ -20,116 +20,61 @@ print(sum(duplicates))
 
 # For an additional check on the data, I am going to make a few histograms and boxplots on the numerical columns to see what the distribution looks like and examine outliers
 
-# Run time minutes
-# Box Plot
-plt.figure(figsize=(10, 6))
-plt.boxplot(filmData['runtime_minutes'], vert=False, patch_artist=True)  # vert=False for horizontal boxplot
-plt.title('Boxplot of Runtime')
-plt.xlabel('Runtime (Minutes)')
-plt.show()
-# Histogram
-plt.figure(figsize=(10, 6))
-plt.hist(filmData['runtime_minutes'], bins=60, color='red', alpha=0.7)
-plt.title('Distribution of Runtime')
-plt.xlabel('Runtime (Minutes)')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+# Set up the figure and axes for subplots
+fig, axs = plt.subplots(5, 2, figsize=(15, 25))
+
+# Runtime
+axs[0, 0].boxplot(filmData['runtime_minutes'], vert=False, patch_artist=True)
+axs[0, 0].set_title('Boxplot of Runtime')
+axs[0, 0].set_xlabel('Runtime (Minutes)')
+
+axs[0, 1].hist(filmData['runtime_minutes'], bins=60, color='red', alpha=0.7)
+axs[0, 1].set_title('Distribution of Runtime')
+axs[0, 1].set_xlabel('Runtime (Minutes)')
+axs[0, 1].set_ylabel('Frequency')
 
 # Average Rating
-# Box Plot
-plt.figure(figsize=(10, 6))
-plt.boxplot(filmData['movie_averageRating'], vert=False, patch_artist=True)  # vert=False for horizontal boxplot
-plt.title('Boxplot of Ratings')
-plt.xlabel('Ratings')
-plt.show()
-# Histogram
-plt.figure(figsize=(10, 6))
-plt.hist(filmData['movie_averageRating'], bins=80, color='tomato', alpha=0.7)
-plt.title('Distribution of Rating')
-plt.xlabel('Ratings')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+axs[1, 0].boxplot(filmData['movie_averageRating'], vert=False, patch_artist=True)
+axs[1, 0].set_title('Boxplot of Ratings')
+axs[1, 0].set_xlabel('Ratings')
 
-# Number of Votes (movie_numerOfVotes)
-# Box Plot
-plt.figure(figsize=(10, 6))
-plt.boxplot(filmData['movie_numerOfVotes'], vert=False, patch_artist=True)  
-plt.title('Boxplot of Votes')
-plt.xlabel('Number of Votes')
-plt.show()
-# Histogram
-plt.figure(figsize=(10, 6))
-plt.hist(filmData['movie_numerOfVotes'], bins=300, color='fuchsia', alpha=0.7)
-plt.title('Distribution of Votes')
-plt.xlabel('Votes')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+axs[1, 1].hist(filmData['movie_averageRating'], bins=80, color='tomato', alpha=0.7)
+axs[1, 1].set_title('Distribution of Rating')
+axs[1, 1].set_xlabel('Ratings')
+axs[1, 1].set_ylabel('Frequency')
 
-# Approval Index (approval_Index)
-# Box Plot
-plt.figure(figsize=(10, 6))
-plt.boxplot(filmData['approval_Index'], vert=False, patch_artist=True)  
-plt.title('Boxplot of Approval Index')
-plt.xlabel('Approval Index')
-plt.show()
-# Histogram
-plt.figure(figsize=(10, 6))
-plt.hist(filmData['approval_Index'], bins=100, color='darkorange', alpha=0.7)
-plt.title('Distribution of Approval Index')
-plt.xlabel('Approval Index')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+# Number of Votes
+axs[2, 0].boxplot(filmData['movie_numerOfVotes'], vert=False, patch_artist=True)
+axs[2, 0].set_title('Boxplot of Votes')
+axs[2, 0].set_xlabel('Number of Votes')
 
-# Production Budget (Production budget $)
-# Box Plot
-plt.figure(figsize=(10, 6))
-plt.boxplot(filmData['Production budget $'], vert=False, patch_artist=True)  
-plt.title('Boxplot of Production Budget')
-plt.xlabel('Production Budget ($)')
-plt.show()
-# Histogram
-plt.figure(figsize=(10, 6))
-plt.hist(filmData['Production budget $'], bins=95, color='blue', alpha=0.7)
-plt.title('Distribution of Production Budget')
-plt.xlabel('Production Budget ($)')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+axs[2, 1].hist(filmData['movie_numerOfVotes'], bins=100, color='blue', alpha=0.7)
+axs[2, 1].set_title('Distribution of Votes')
+axs[2, 1].set_xlabel('Number of Votes')
+axs[2, 1].set_ylabel('Frequency')
 
-# Domestic Gross (Domestic gross $)
-# Box Plot
-plt.figure(figsize=(10, 6))
-plt.boxplot(filmData['Domestic gross $'], vert=False, patch_artist=True)  
-plt.title('Boxplot of Domestic Gross Revenue')
-plt.xlabel('Domestic Gross ($)')
-plt.show()
-# Histogram
-plt.figure(figsize=(10, 6))
-plt.hist(filmData['Domestic gross $'], bins=100, color='forestgreen', alpha=0.7)
-plt.title('Distribution of Domestic Gross Revenue')
-plt.xlabel('Domestic Gross ($)')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+# Approval Index
+axs[3, 0].boxplot(filmData['approval_Index'], vert=False, patch_artist=True)
+axs[3, 0].set_title('Boxplot of Approval Index')
+axs[3, 0].set_xlabel('Approval Index')
 
-# Worldwide gross (Worldwide gross $)
-# Box Plot
-plt.figure(figsize=(10, 6))
-plt.boxplot(filmData['Worldwide gross $'], vert=False, patch_artist=True)  
-plt.title('Boxplot of Worldwide Gross Revenue')
-plt.xlabel('Worldwide Gross ($)')
-plt.show()
-# Histogram
-plt.figure(figsize=(10, 6))
-plt.hist(filmData['Worldwide gross $'], bins=150, color='goldenrod', alpha=0.7)
-plt.title('Distribution of Worldwide Gross Revenue')
-plt.xlabel('Worldwide Gross ($)')
-plt.ylabel('Frequency')
-plt.grid(True)
+axs[3, 1].hist(filmData['approval_Index'], bins=100, color='green', alpha=0.7)
+axs[3, 1].set_title('Distribution of Approval Index')
+axs[3, 1].set_xlabel('Approval Index')
+axs[3, 1].set_ylabel('Frequency')
+
+# Production Budget
+axs[4, 0].boxplot(filmData['Production budget $'], vert=False, patch_artist=True)
+axs[4, 0].set_title('Boxplot of Production Budget')
+axs[4, 0].set_xlabel('Production Budget ($)')
+
+axs[4, 1].hist(filmData['Production budget $'], bins=100, color='purple', alpha=0.7)
+axs[4, 1].set_title('Distribution of Production Budget')
+axs[4, 1].set_xlabel('Production Budget ($)')
+axs[4, 1].set_ylabel('Frequency')
+
+# Adjust layout
+plt.subplots_adjust(left=0.1, bottom=0.05, right=0.9, top=0.95, wspace=0.1, hspace=0.8)
 plt.show()
 
 # Genre Analysis
@@ -138,6 +83,7 @@ filmData['genre_list'] = filmData['genres'].str.split(',')
 exploded_genres = filmData.explode('genre_list')
 genre_counts = exploded_genres['genre_list'].value_counts()
 
+print(genre_counts)
 # Wow it looks like our top genres are Drama, Comedy, Action, Adventure, and Crime. Lets save a list of our top 10 most popular Genres
 ten_most_popular_genres = genre_counts.head(10)
 ten_most_popular_genres_names = ten_most_popular_genres.tolist()
@@ -222,7 +168,7 @@ budget_revenue_correlation = filmData['Production budget $'].corr(filmData['Worl
 # Graph the strong correlation so we can see it
 plt.figure(figsize=(10, 6))
 plt.scatter(filmData['Production budget $'], filmData['Worldwide gross $'], alpha=0.6, label = 'Data points')
-# Calalculate Trend Line
+# Calculate Trend Line
 z = np.polyfit(filmData['Production budget $'], filmData['Worldwide gross $'], 1) # 1 for linear
 p = np.poly1d(z)
 plt.plot(filmData['Production budget $'], p(filmData['Production budget $']), 'r--', label = 'Trend line')
@@ -250,12 +196,43 @@ plt.title('Heatmap of Correlations Among Numerical Variables')
 plt.show()
 
 # Make a regression model for worldwide revenue
-# One-hot encode 'genre_list' and potentially other categorical variables
-filmData = pd.get_dummies(filmData, columns=['genre_list'])
+# One-hot encode 'genre_list'
+filmData_regression = pd.get_dummies(exploded_genres, columns=['genre_list'], drop_first=True)
+filmData_regression['production_date'] = pd.to_datetime(filmData_regression['production_date'])
+filmData_regression['production_year'] = filmData_regression['production_date'].dt.year
 
-# Prepare predictors including the new dummy variables and the year
-X = filmData[['Production budget $', 'runtime_minutes', 'movie_averageRating', 'movie_numerOfVotes', 'year'] + [col for col in filmData.columns if 'genre_list_' in col]]
-y = filmData['Worldwide gross $']
+genre_columns = [col for col in filmData_regression.columns if 'genre_list_' in col]
+
+#Re-aggregate Data
+filmData_regression = filmData_regression.groupby('movie_title').agg({
+    'production_date': 'first',
+    'genres': 'first',
+    'runtime_minutes': 'first',
+    'director_name': 'first',
+    'director_professions': 'first',
+    'director_birthYear': 'first',
+    'director_deathYear': 'first',
+    'movie_averageRating': 'first',
+    'movie_numerOfVotes': 'first',
+    'approval_Index': 'first',  
+    'Production budget $': 'first',
+    'Domestic gross $': 'first',
+    'Worldwide gross $': 'first',
+    'production_year': 'first',
+    **{col: 'max' for col in genre_columns}
+}).reset_index()
+
+
+
+
+
+# Prepare predictors for x, y least squares constant
+X = filmData_regression[['Production budget $', 'runtime_minutes', 'movie_averageRating', 'movie_numerOfVotes', 'production_year'] + [col for col in genre_columns]]
+bool_cols = [col for col in X.columns if X[col].dtype == bool]
+X[bool_cols] = X[bool_cols].astype(int) 
+
+y = filmData_regression['Worldwide gross $']
+
 
 # Add a constant for the intercept
 X = sm.add_constant(X)
