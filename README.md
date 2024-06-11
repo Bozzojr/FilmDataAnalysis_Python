@@ -360,8 +360,10 @@ The coefficients tables shows the impact of each variable:
 
 -**Condition Number:** A very high condition number indicates potential multicollinearity among predictors, which can inflate the variance of coefficient estimates making them unstable and unreliable.
 
-### Recommendations and Next Steps...
-This regression analysis is a work in progress. Plans to optimize model coming soon....
+### Model Optimization
+We are going to address the multicollinearity using Variance Inflation Factor (VIF) analysis:
+
+
 
 
 
