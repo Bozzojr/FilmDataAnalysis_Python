@@ -361,8 +361,95 @@ The coefficients tables shows the impact of each variable:
 -**Condition Number:** A very high condition number indicates potential multicollinearity among predictors, which can inflate the variance of coefficient estimates making them unstable and unreliable.
 
 ### Model Optimization
-We are going to address the multicollinearity using Variance Inflation Factor (VIF) analysis:
+To help address multicollinearity and improve model, we will remove categories with high p-value, as they are not significant and can't be relied on to make a prediction for worldwide gross revenue.
 
+Our updated code for the model is:
+```python
+# Fit regression model
+X = filmData_regression[['Production budget $', 'movie_numerOfVotes'] + [col for col in genre_columns]]
+# Drop genre categories with high p-values
+columns_to_drop = ['genre_list_Biography', 'genre_list_Film-Noir', 'genre_list_News', 'genre_list_War', "genre_list_\\N", 'genre_list_Mystery', 'genre_list_Sport', 'genre_list_Thriller', 'genre_list_Western']
+X = X.drop(columns_to_drop, axis=1)
+
+bool_cols = [col for col in X.columns if X[col].dtype == bool]
+X[bool_cols] = X[bool_cols].astype(int) 
+
+# Rename columns
+rename_dict = {col: col.replace('genre_list_', '') for col in X.columns if col.startswith('genre_list_')}
+X = X.rename(columns=rename_dict)
+
+
+y = filmData_regression['Worldwide gross $']
+
+
+# Add a constant for the intercept
+X = sm.add_constant(X)
+
+
+# Fit the model
+model = sm.OLS(y, X).fit()
+
+# View the model summary
+print(model.summary())
+
+
+model_filename = 'BO_Revenue_Predictive_Model.pkl'          
+with open(model_filename, 'wb') as file:
+    pickle.dump(model, file)
+```
+This updated code reduces down the number of features for the model. It can now be used to predict worldwide gross revenue.
+
+We will create an interface for the model using streamlit.
+
+```python
+import streamlit as st
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import pickle
+
+# Load trained file
+model = pickle.load(open('BO_Revenue_Predictive_Model.pkl', 'rb'))
+
+# Title of app
+st.title('Movie Worldwide Revenue Prediction')
+
+# Description
+st.write('This app predicts the worldwide gross revenue of movies based on inputs like production budget, movie rating, and genre.')
+
+# Collect user input
+constant = float(1)
+budget = st.number_input('Enter the production budget ($):', min_value=0, max_value=10000000000, value=10000000)
+num_votes = st.slider('Enter rating (0.0 to 10.0):', min_value=0.00, max_value=10.00, value=5.00, step=0.01, format="%.2f")
+genres = ['Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Musical', 'Romance', 'Sci-Fi']
+selected_genre = st.selectbox('Select the genre:', genres)
+num_votes_transformed = (num_votes/10)*1000000
+
+
+# Dummy encoding for genres
+genre_data = {genre: 0 for genre in genres} # Initialize all genres to 0
+genre_data[selected_genre] = 1 # Set selected genre to 1
+ 
+# Prepare featurs for prediction
+features = [constant, budget, num_votes_transformed] + list(genre_data.values())
+features = np.array(features)
+
+
+# Predict button
+if st.button('Predict Revenue'):
+    prediction = model.predict(features.reshape(1, -1))
+    st.success(f'Estimated Worldwide Gross Revenue: ${prediction[0]:,.2f}')
+
+
+
+st.markdown('## Model Information')
+st.text('This model is build using a least squares regression method to estimate ')
+st.text('potential movie revenues based on historical data')
+```
+
+And the resulting interface looks like this when ran:
+
+![app_interface](https://github.com/Bozzojr/FilmDataAnalysis_Python/assets/123130175/da58f1c8-59d6-41e5-8c6c-7cc2727ddd5b)
 
 
 
