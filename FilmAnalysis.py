@@ -4,10 +4,12 @@ import numpy as np
 import plotly.express as px
 import scipy.stats as stats
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 import statsmodels.api as sm
 import seaborn as sns
+import pickle
 
-filmData = pd.read_csv('FilmProject\Data\movie_statistic_dataset.csv')
+filmData = pd.read_csv('Data\movie_statistic_dataset.csv')
 
 filmData.head()
 filmData.describe()
@@ -203,6 +205,7 @@ filmData_regression['production_year'] = filmData_regression['production_date'].
 
 genre_columns = [col for col in filmData_regression.columns if 'genre_list_' in col]
 
+
 #Re-aggregate Data
 filmData_regression = filmData_regression.groupby('movie_title').agg({
     'production_date': 'first',
@@ -223,13 +226,19 @@ filmData_regression = filmData_regression.groupby('movie_title').agg({
 }).reset_index()
 
 
+# Fit regression model
+X = filmData_regression[['Production budget $', 'movie_numerOfVotes'] + [col for col in genre_columns]]
+# Drop genre categories with high p-values
+columns_to_drop = ['genre_list_Biography', 'genre_list_Film-Noir', 'genre_list_News', 'genre_list_War', "genre_list_\\N", 'genre_list_Mystery', 'genre_list_Sport', 'genre_list_Thriller', 'genre_list_Western']
+X = X.drop(columns_to_drop, axis=1)
 
-
-
-# Prepare predictors for x, y least squares constant
-X = filmData_regression[['Production budget $', 'runtime_minutes', 'movie_averageRating', 'movie_numerOfVotes', 'production_year'] + [col for col in genre_columns]]
 bool_cols = [col for col in X.columns if X[col].dtype == bool]
 X[bool_cols] = X[bool_cols].astype(int) 
+
+# Rename columns
+rename_dict = {col: col.replace('genre_list_', '') for col in X.columns if col.startswith('genre_list_')}
+X = X.rename(columns=rename_dict)
+
 
 y = filmData_regression['Worldwide gross $']
 
@@ -237,8 +246,15 @@ y = filmData_regression['Worldwide gross $']
 # Add a constant for the intercept
 X = sm.add_constant(X)
 
+
 # Fit the model
 model = sm.OLS(y, X).fit()
 
 # View the model summary
 print(model.summary())
+
+
+model_filename = 'BO_Revenue_Predictive_Model.pkl'          
+with open(model_filename, 'wb') as file:
+    pickle.dump(model, file)
+
